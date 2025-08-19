@@ -40,7 +40,7 @@ sudo apt install -y python3 python3-pip python3-venv git
 
 ### 3) Go to the project folder (WSL path)
 ```bash
-cd /mnt/c/Users/duggy/OneDrive/Belgeler/Github/FallDetection/ai-service
+cd /mnt/<path>/FallDetection/ai-service
 ```
 
 ### 4) Create and activate a virtual environment
@@ -105,7 +105,9 @@ safetensors==0.6.2
 ```bash
 source smolvlm2_env/bin/activate
 ```
-2) Put test images into `test-images/` (supports: jpg, jpeg, png, webp, bmp, tiff)
+2) Put test images into the repository-level `test-images/` folder (not inside `ai-service/`).
+   - Windows path: `<path>\FallDetection\test-images`
+   - WSL path: `/mnt/<path>/FallDetection/test-images`
 3) Run:
 ```bash
 python3 analyze_image.py
@@ -157,12 +159,13 @@ You can expand your dataset using this convention to quickly sanity-check accura
 ## 📁 Project Structure
 
 ```
-ai-service/
-├── analyze_image.py      # Main script (multi-crop + two-step + voting)
-├── requirements.txt      # Pinned dependencies
-├── README.md             # This file
-├── logs/                 # Run logs
-└── test-images/          # Input images
+FallDetection/
+├── ai-service/
+│   ├── analyze_image.py      # Main script (multi-crop + two-step + voting)
+│   ├── requirements.txt      # Pinned dependencies
+│   ├── README.md             # This file
+│   └── logs/                 # Run logs
+└── test-images/              # Input images (repository-level)
 ```
 
 ## ⚙️ Performance notes
@@ -171,17 +174,6 @@ ai-service/
 - First run: model download (a few minutes)
 - Subsequent runs: a few seconds per image (depending on size/crops)
 
-## 🧭 Roadmap (optional)
-
-- Dockerized microservice (FastAPI): `/infer` endpoint for images
-- Batch endpoints and background queue
-- CSV/JSON metrics export (accuracy, precision/recall against filename labels)
-- Real-time video polling service (multi-process)
-
-## 📄 License
-
-MIT
-
 ## Environment used
 
-- WSL2 Ubuntu + Python 3.12 + RTX 4070 + CUDA 12.1
+- WSL2 Ubuntu 24 + Python 3.12 + RTX 4070 + CUDA 12.1
