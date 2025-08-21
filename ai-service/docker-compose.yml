@@ -1,0 +1,108 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: fall_detection_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fall_detection
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - fall_detection_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fall_detection"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Fall Detection AI Service
+  ai-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: fall_detection_api
+    restart: unless-stopped
+    environment:
+      # Database configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: fall_detection
+      
+      # Python environment
+      PYTHONPATH: /app
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+      
+      # HuggingFace cache
+      TRANSFORMERS_CACHE: /app/.cache/transformers
+      HF_HOME: /app/.cache/huggingface
+    volumes:
+      # Model cache volumes for faster restarts
+      - model_cache:/app/.cache
+      - app_logs:/app/logs
+    ports:
+      - "8000:8000"
+    networks:
+      - fall_detection_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: fall_detection_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@falldetection.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+    networks:
+      - fall_detection_network
+    depends_on:
+      - postgres
+    profiles:
+      - admin  # Optional service, run with --profile admin
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  model_cache:
+    driver: local
+  app_logs:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+# Custom network
+networks:
+  fall_detection_network:
+    driver: bridge

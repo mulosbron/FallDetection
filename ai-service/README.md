@@ -1,179 +1,307 @@
-# SmolVLM2 Fall Detection AI Service
+# Fall Detection API 🚨
 
-This project runs fall detection on images using the SmolVLM2 model, optimized for an RTX 4070 in WSL2 (Ubuntu).
+SmolVLM2 tabanlı düşme tespiti yapan containerized FastAPI servisi.
 
-## 🚀 What it does
+## 🏗️ Sistem Mimarisi
 
-- Uses `HuggingFaceTB/SmolVLM2-2.2B-Instruct` for vision-language inference
-- Deterministic Yes/No output per image
-- Robust logic:
-  - Multi-crop voting (center and zoom crops)
-  - Two-step questioning per crop:
-    1) "Is there a person visible?" (Yes/No)
-    2) If Yes → "Is a person lying on the ground/floor (fallen)?" (Yes/No)
-  - Final decision by majority vote across crops
-- Detailed logging with timestamps and per-test results
-
-## 📋 System Requirements
-
-- GPU: NVIDIA RTX 4070 (or similar) with CUDA 12.1 support
-- RAM: 16 GB minimum
-- Disk: 10 GB free
-- OS: Windows 10/11 with WSL2 (Ubuntu)
-- Python: 3.12 (recommended)
-
-## 🛠️ Setup (Windows + WSL2)
-
-### 1) Install WSL2 (once)
-```powershell
-# Run in Windows PowerShell (Admin)
-wsl --install
-# Reboot when prompted
+```
+FastAPI-POST [görsel] → Model [analiz] → PostgreSQL [sonuç] → FastAPI-GET [hash+sonuç]
 ```
 
-### 2) Update Ubuntu
+## 🚀 Hızlı Başlangıç
+
+### 1. Sistem Gereksinimleri
+- Docker ve Docker Compose
+- NVIDIA GPU (CUDA 12.1+ destekli)
+- nvidia-docker runtime
+
+### 2. Servisları Başlat
 ```bash
-# Inside WSL (Ubuntu)
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y python3 python3-pip python3-venv git
+# Tüm servisleri başlat
+docker-compose up -d
+
+# Sadece AI servisi (pgAdmin olmadan)
+docker-compose up -d postgres ai-service
+
+# pgAdmin ile birlikte (veritabanı yönetimi için)
+docker-compose --profile admin up -d
 ```
 
-### 3) Go to the project folder (WSL path)
+### 3. Servis Durumunu Kontrol Et
 ```bash
-cd /mnt/<path>/FallDetection/ai-service
+# Health check
+curl http://localhost:8000/health
+
+# API dokümantasyonu
+# Browser'da: http://localhost:8000/docs
 ```
 
-### 4) Create and activate a virtual environment
+## 📡 API Endpoints
+
+### 🔍 Health Check
 ```bash
-python3 -m venv smolvlm2_env
-source smolvlm2_env/bin/activate
+GET /health
+```
+**Yanıt:**
+```json
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "database_connected": true,
+  "gpu_available": true,
+  "statistics": {...}
+}
 ```
 
-### 5) Install PyTorch (CUDA 12.1 wheels)
+### 🖼️ Tek Görsel Analizi
 ```bash
-pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 \
-  --index-url https://download.pytorch.org/whl/cu121
+POST /detect-fall/
+Content-Type: multipart/form-data
 ```
 
-### 6) Install the rest of the dependencies
+**cURL örneği:**
 ```bash
+curl -X POST \
+  http://localhost:8000/detect-fall/ \
+  -F "file=@/path/to/image.jpg"
+```
+
+**Yanıt:**
+```json
+{
+  "image_hash": "abc123...",
+  "result": "Yes",
+  "confidence": 0.85,
+  "image_size": "640x480",
+  "processing_time_ms": 1250,
+  "cached": false
+}
+```
+
+### 📚 Batch Görsel Analizi
+```bash
+POST /detect-fall-batch/
+Content-Type: multipart/form-data
+```
+
+**cURL örneği:**
+```bash
+curl -X POST \
+  http://localhost:8000/detect-fall-batch/ \
+  -F "files=@image1.jpg" \
+  -F "files=@image2.jpg" \
+  -F "files=@image3.jpg"
+```
+
+**Yanıt:**
+```json
+{
+  "results": [
+    {
+      "filename": "image1.jpg",
+      "image_hash": "abc123...",
+      "result": "Yes",
+      "confidence": 0.85,
+      "processing_time_ms": 1250,
+      "cached": false
+    },
+    {...}
+  ]
+}
+```
+
+### 🔍 Hash ile Sonuç Sorgulama
+```bash
+GET /result/{image_hash}
+```
+
+**Örnek:**
+```bash
+curl http://localhost:8000/result/abc123456...
+```
+
+### 📊 İstatistikler
+```bash
+GET /statistics
+```
+
+**Yanıt:**
+```json
+{
+  "total_processed": 1247,
+  "fall_detected": 89,
+  "no_fall": 1158,
+  "avg_processing_time_ms": 1180.5,
+  "days_active": 15
+}
+```
+
+## 🧪 Test Etme
+
+### Otomatik Test Script
+```bash
+python test_api.py
+```
+
+### Manuel Test
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Tek görsel test
+curl -X POST \
+  http://localhost:8000/detect-fall/ \
+  -F "file=@test_image.jpg"
+
+# İstatistikler
+curl http://localhost:8000/statistics
+```
+
+## 🔧 Konfigürasyon
+
+### Environment Variables
+```bash
+# Database
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=fall_detection
+
+# Python
+PYTHONUNBUFFERED=1
+PYTHONDONTWRITEBYTECODE=1
+
+# HuggingFace Cache
+TRANSFORMERS_CACHE=/app/.cache/transformers
+HF_HOME=/app/.cache/huggingface
+```
+
+### Docker Compose Profiller
+```bash
+# Sadece temel servisler
+docker-compose up -d
+
+# pgAdmin ile birlikte
+docker-compose --profile admin up -d
+```
+
+## 📊 Veritabanı
+
+### Tablo Yapısı
+```sql
+fall_detections:
+- id (SERIAL PRIMARY KEY)
+- image_hash (VARCHAR(64) UNIQUE)
+- result (VARCHAR(10)) -- 'Yes' or 'No'
+- confidence (FLOAT)
+- created_at (TIMESTAMP)
+- image_size (VARCHAR(20))
+- processing_time_ms (INTEGER)
+```
+
+### pgAdmin Erişim
+- URL: http://localhost:8080
+- Email: admin@falldetection.com
+- Password: admin123
+
+## 🚨 Önemli Özellikler
+
+### ✅ Cache Sistemi
+- Aynı görseller (SHA256 hash) için veritabanından sonuç döner
+- Duplicate processing önlenir
+- Hızlı yanıt süresi
+
+### ✅ Multi-Crop Voting
+- Her görsel 3 farklı crop ile analiz edilir
+- Çoğunluk oylaması ile sonuç belirlenir
+- Daha güvenilir sonuçlar
+
+### ✅ GPU Optimizasyonu
+- NVIDIA CUDA desteği
+- Model GPU'da çalışır
+- Memory management ile efficient kullanım
+
+### ✅ Async Processing
+- Non-blocking operations
+- Multiple request handling
+- Better performance
+
+## 🔧 Sorun Giderme
+
+### Model Yüklenmiyor
+```bash
+# Container logs kontrol et
+docker-compose logs ai-service
+
+# CUDA kontrol et
+docker exec -it fall_detection_api nvidia-smi
+```
+
+### Database Bağlantı Sorunu
+```bash
+# PostgreSQL status
+docker-compose logs postgres
+
+# Database bağlantı test
+docker exec -it fall_detection_db psql -U postgres -d fall_detection
+```
+
+### Memory/GPU Sorunları
+```bash
+# GPU memory kullanımı
+docker exec -it fall_detection_api nvidia-smi
+
+# Container resources
+docker stats fall_detection_api
+```
+
+## 📈 Performance
+
+### Beklenen Performans
+- **Tek görsel**: ~1-2 saniye (ilk kez)
+- **Cache hit**: ~50-100ms
+- **Batch processing**: Paralel olmayan, sıralı işlem
+- **Memory usage**: ~4-8GB GPU VRAM
+
+### Optimizasyon İpuçları
+1. Model cache volume kullan (daha hızlı restart)
+2. Aynı görselleri tekrar gönderme (cache)
+3. Batch yerine parallel single requests
+4. GPU memory monitoring
+
+## 🔒 Güvenlik
+
+- Non-root user container
+- No image storage (memory only)
+- Environment variables for config
+- Health checks for monitoring
+
+## 📝 Geliştirme
+
+### Local Development
+```bash
+# Virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Dependencies
 pip install -r requirements.txt
+
+# Run locally
+python main.py
 ```
 
-## 📦 requirements.txt
-
-```txt
-# Transformers with SmolVLM2 support (required)
-git+https://github.com/huggingface/transformers@v4.49.0-SmolVLM-2
-
-# PyTorch CUDA 12.1 (install via the index-url above)
-torch==2.5.1+cu121
-torchvision==0.20.1+cu121
-torchaudio==2.5.1+cu121
---index-url https://download.pytorch.org/whl/cu121
-
-# Image processing
-Pillow==11.0.0
-numpy==2.1.2
-
-# HTTP and utilities
-requests==2.32.5
-tqdm==4.67.1
-
-# Logging / monitoring
-psutil==7.0.0
-
-# Required extra
-num2words==0.5.14
-
-# Hugging Face stack
-huggingface-hub==0.34.4
-tokenizers==0.21.4
-safetensors==0.6.2
-```
-
-## ✅ Deterministic Yes/No logic (how it works)
-
-- Prompts are asked through the processor chat template with a PIL image.
-- Generation is deterministic: `do_sample=False`, `temperature=0.0`, `max_new_tokens=2` → short, stable Yes/No.
-- Only newly generated tokens are decoded (no prompt leakage).
-- Precision fix: only `pixel_values` are cast to `float16`; text tensors remain default to avoid weight/input dtype mismatch.
-
-## ▶️ Usage
-
-1) Activate your env each session:
+### Logs
 ```bash
-source smolvlm2_env/bin/activate
-```
-2) Put test images into the repository-level `test-images/` folder (not inside `ai-service/`).
-   - Windows path: `<path>\FallDetection\test-images`
-   - WSL path: `/mnt/<path>/FallDetection/test-images`
-3) Run:
-```bash
-python3 analyze_image.py
+# Container logs
+docker-compose logs -f ai-service
+
+# Database logs
+docker-compose logs -f postgres
 ```
 
-You will see per-image logs and final decision:
-- Person on ground → `Yes`
-- No person / person not fallen → `No`
+---
 
-Logs are saved under `logs/smolvlm2_test_YYYYMMDD_HHMMSS.log`.
-
-## 🧠 What changed vs a naive prompt
-
-- Naive single-question prompting often yields unstable or wrong results.
-- This implementation adds:
-  - Multi-crop image evidence (center + tighter crops)
-  - Two-step questions (presence → fallen)
-  - Majority voting
-- Together, these significantly improve robustness and reduce false positives/negatives.
-
-## 🧪 Example ground-truth convention
-
-- Files named like `fall_1_x.jpg|png|webp` represent images with a fallen person → expected `Yes`.
-- Files named like `fall_0_x.jpg|png|webp` represent non-fall images → expected `No`.
-
-You can expand your dataset using this convention to quickly sanity-check accuracy.
-
-## 🔧 Troubleshooting
-
-- CUDA not available
-  - Check driver, WSL GPU support, and run:
-    ```bash
-    python3 -c "import torch; print(torch.cuda.is_available())"
-    ```
-
-- Dtype mismatch like: `Input type (CUDABFloat16Type) and weight type (torch.cuda.HalfTensor) should be the same`
-  - Ensure only `pixel_values` are cast to `float16` (code already does this)
-  - Keep model weights in `float16` (default from checkpoint)
-
-- Long first run
-  - First model load downloads weights; subsequent runs are fast
-
-- No `pip` in WSL
-  - `sudo apt install -y python3-pip python3-venv`
-
-- Missing Hugging Face auth for private models
-  - `export HUGGING_FACE_HUB_TOKEN=your_token_here`
-
-## 📁 Project Structure
-
-```
-FallDetection/
-├── ai-service/
-│   ├── analyze_image.py      # Main script (multi-crop + two-step + voting)
-│   ├── requirements.txt      # Pinned dependencies
-│   ├── README.md             # This file
-│   └── logs/                 # Run logs
-└── test-images/              # Input images (repository-level)
-```
-
-## ⚙️ Performance notes
-
-- Model VRAM footprint: ~4.2 GB (RTX 4070)
-- First run: model download (a few minutes)
-- Subsequent runs: a few seconds per image (depending on size/crops)
-
-## Environment used
-
-- WSL2 Ubuntu 24 + Python 3.12 + RTX 4070 + CUDA 12.1
+📧 **Support**: [GitHub Issues](https://github.com/your-repo/issues)
+🚀 **Version**: 1.0.0
