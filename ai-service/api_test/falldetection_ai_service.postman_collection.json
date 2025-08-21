@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "194dde44-4c38-4ebd-a705-77362936d9f7",
+		"name": "falldetection_ai_service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38198509"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fall-Detect",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/duggy/OneDrive/Belgeler/Github/FallDetection/test-images/fallingtest_0_0104.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8000/detect-fall/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"detect-fall",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fall-Detect",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/result/c827098e86bab9e4dacf830d023e071b89fec650cd5d128de48f30d9ab9dad7f",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"result",
+						"c827098e86bab9e4dacf830d023e071b89fec650cd5d128de48f30d9ab9dad7f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fall-Detect-Batch",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "files",
+							"type": "file",
+							"src": "/C:/Users/duggy/OneDrive/Belgeler/Github/FallDetection/test-images/fallingtest_0_0008.jpg"
+						},
+						{
+							"key": "files",
+							"type": "file",
+							"src": "/C:/Users/duggy/OneDrive/Belgeler/Github/FallDetection/test-images/fallingtest_0_0069.jpg"
+						},
+						{
+							"key": "files",
+							"type": "file",
+							"src": "/C:/Users/duggy/OneDrive/Belgeler/Github/FallDetection/test-images/fallingtest_1_2351.jpg"
+						},
+						{
+							"key": "files",
+							"type": "file",
+							"src": "/C:/Users/duggy/OneDrive/Belgeler/Github/FallDetection/test-images/fallingtest_1_3995.jpg"
+						},
+						{
+							"key": "files",
+							"type": "file",
+							"src": "/C:/Users/duggy/OneDrive/Belgeler/Github/FallDetection/test-images/fallingtest_0_3136.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8000/detect-fall-batch/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"detect-fall-batch",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Statistics",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/statistics",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"statistics"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
