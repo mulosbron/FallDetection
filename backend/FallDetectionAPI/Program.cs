@@ -1,8 +1,34 @@
+using Microsoft.EntityFrameworkCore;
+using FallDetectionAPI.Data;
+using FallDetectionAPI.Configuration;
+using FallDetectionAPI.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Add Controllers
+builder.Services.AddControllers();
+
+// Add Entity Framework
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+// Add Configuration Options
+builder.Services.Configure<AiServiceOptions>(
+    builder.Configuration.GetSection(AiServiceOptions.SectionName));
+builder.Services.Configure<QueueOptions>(
+    builder.Configuration.GetSection(QueueOptions.SectionName));
+
+// Add Custom Services
+builder.Services.AddSingleton<IFrameQueue, FrameQueue>();
+builder.Services.AddSingleton<IVideoCameraSimulator, VideoCameraSimulator>(); // Video-based camera simulator
+builder.Services.AddHostedService<FrameProcessor>();
+
+// Add HttpClient for AiClient (single registration)
+builder.Services.AddHttpClient<IAiClient, AiClient>();
 
 var app = builder.Build();
 
@@ -13,29 +39,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
