@@ -1,0 +1,30 @@
+services:
+  backend:
+    build: .
+    container_name: fall_detection_backend
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=fall_detection;Username=postgres;Password=postgres"
+      AiService__BaseUrl: "http://ai-service:8000"
+      Queue__Capacity: 200
+      Queue__FlushIntervalMs: 1000
+      Queue__MaxBatchSize: 10
+    volumes:
+      - ./Videos:/app/Videos:ro
+    networks:
+      - fall_detection_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+networks:
+  fall_detection_network:
+    name: ai-service_fall_detection_network
+    external: true
