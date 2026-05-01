@@ -1,0 +1,29 @@
+# SignalR only - first run: docker network create fall_detection_network
+name: falldetection
+
+services:
+  fall-detection-signalr:
+    build:
+      context: ../../..
+      dockerfile: src/Presentation/SignalR/Dockerfile
+    container_name: fall_detection_signalr
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8081
+      - Cors__AllowedOrigins__0=http://localhost:3000
+      - Cors__AllowedOrigins__1=http://127.0.0.1:3000
+      - Cors__AllowedOrigins__2=http://localhost:5173
+    ports:
+      - "5001:8081"
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    networks:
+      - fall_detection_network
+
+networks:
+  fall_detection_network:
+    external: true
+    name: fall_detection_network

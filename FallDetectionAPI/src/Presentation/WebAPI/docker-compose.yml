@@ -1,0 +1,60 @@
+# WebAPI + Postgres only - SignalR runs from a separate compose.
+#   docker network create fall_detection_network
+name: falldetection
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fall_detection_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fall_detection
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fall_detection_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fall_detection"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  fall-detection-api:
+    build:
+      context: ../../..
+      dockerfile: src/Presentation/WebAPI/Dockerfile
+    container_name: fall_detection_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Host=fall_detection_db;Database=fall_detection;Username=postgres;Password=postgres
+      - AiService__BaseUrl=http://fall_detection_ai_service:8000
+      - MockCamera__BaseUrl=http://fall_detection_mock_stream_injector:8001
+      - MockCamera__HlsBaseUrl=http://fall_detection_mock_rtsp_server:8888
+      - MockCamera__HlsPublicBaseUrl=http://localhost:8888
+      - MockCamera__StreamPathPrefix=/live
+      - SignalRHost__BaseUrl=${SIGNALR_BASE_URL:-http://host.docker.internal:5001}
+    ports:
+      - "5000:8080"
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    networks:
+      - fall_detection_network
+
+volumes:
+  postgres_data:
+
+networks:
+  fall_detection_network:
+    external: true
+    name: fall_detection_network
