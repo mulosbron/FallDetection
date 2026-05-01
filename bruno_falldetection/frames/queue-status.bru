@@ -1,0 +1,23 @@
+meta {
+  name: Frames queue status
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{webApiBase}}/api/frames/queue/status
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("queue payload", function () {
+    var body = res.getBody();
+    expect(body.service).to.equal("frame-queue");
+    expect(body.queue_size).to.not.equal(undefined);
+  });
+}

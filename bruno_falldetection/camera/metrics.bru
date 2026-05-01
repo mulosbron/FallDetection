@@ -1,0 +1,31 @@
+meta {
+  name: Camera metrics
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{webApiBase}}/api/camera/metrics
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200 or 503", function () {
+    expect([200, 503]).to.include(res.getStatus());
+  });
+
+  test("metrics payload when service is available", function () {
+    if (res.getStatus() === 200) {
+      var body = res.getBody();
+      expect(body.type).to.equal("mock_camera_service");
+    }
+  });
+
+  test("error payload when unavailable", function () {
+    if (res.getStatus() === 503) {
+      var body = res.getBody();
+      expect(body.error).to.equal("Camera service unavailable");
+    }
+  });
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Notify camera-update minimal payload
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{signalrBase}}/internal/notify/camera-update
+  body: json
+  auth: none
+}
+
+body:json {
+  {}
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("published", function () {
+    var body = res.getBody();
+    expect(body.published).to.equal(true);
+  });
+}

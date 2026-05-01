@@ -1,0 +1,26 @@
+meta {
+  name: Camera alert status
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{webApiBase}}/api/camera/alert-status
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("alert status payload", function () {
+    var body = res.getBody();
+    var cameras = body.Cameras || body.cameras;
+    var totalCameras = body.TotalCameras || body.totalCameras;
+    var isArrayOrObject = Array.isArray(cameras) || (cameras !== null && typeof cameras === "object");
+    expect(isArrayOrObject).to.equal(true);
+    expect(totalCameras).to.not.equal(undefined);
+  });
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Results result invalid hash
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{webApiBase}}/api/results/result/123
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 400", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

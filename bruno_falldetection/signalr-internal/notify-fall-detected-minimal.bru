@@ -1,0 +1,26 @@
+meta {
+  name: Notify fall-detected minimal payload
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{signalrBase}}/internal/notify/fall-detected
+  body: json
+  auth: none
+}
+
+body:json {
+  {}
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("published", function () {
+    var body = res.getBody();
+    expect(body.published).to.equal(true);
+  });
+}

@@ -1,0 +1,23 @@
+meta {
+  name: WebAPI /api/health
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{webApiBase}}/api/health
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("api health payload", function () {
+    var body = res.getBody();
+    expect(body.status).to.equal("healthy");
+    expect(body.service).to.not.equal(undefined);
+  });
+}

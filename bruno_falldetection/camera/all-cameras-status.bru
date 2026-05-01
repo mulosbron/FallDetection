@@ -1,0 +1,26 @@
+meta {
+  name: Camera all cameras status
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{webApiBase}}/api/camera/all-cameras-status
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("all cameras payload", function () {
+    var body = res.getBody();
+    var summary = body.Summary || body.summary;
+    var cameras = body.Cameras || body.cameras;
+    var isArrayOrObject = Array.isArray(cameras) || (cameras !== null && typeof cameras === "object");
+    expect(summary).to.not.equal(undefined);
+    expect(isArrayOrObject).to.equal(true);
+  });
+}

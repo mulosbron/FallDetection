@@ -1,0 +1,22 @@
+meta {
+  name: HLS manifest camera1
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{mediamtxHlsBase}}/live/camera1/index.m3u8
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("m3u8 header", function () {
+    var bodyText = res.getBody({ raw: true });
+    expect(bodyText.includes("#EXTM3U")).to.equal(true);
+  });
+}

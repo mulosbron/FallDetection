@@ -1,0 +1,17 @@
+meta {
+  name: Results result not found
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{webApiBase}}/api/results/result/notfoundhash0001
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 404 or 503", function () {
+    expect([404, 503]).to.include(res.getStatus());
+  });
+}

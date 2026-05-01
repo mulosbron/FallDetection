@@ -1,0 +1,24 @@
+meta {
+  name: Camera inventory
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{webApiBase}}/api/camera/inventory
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("camera list", function () {
+    var body = res.getBody();
+    expect(Array.isArray(body.cameras)).to.equal(true);
+    expect(body.total).to.be.greaterThan(0);
+    expect(body.cameras[0].hlsUrl).to.not.equal(undefined);
+  });
+}

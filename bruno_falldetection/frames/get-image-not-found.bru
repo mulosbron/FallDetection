@@ -1,0 +1,17 @@
+meta {
+  name: Frames get image not found
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{webApiBase}}/api/frames/image/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 404", function () {
+    expect(res.getStatus()).to.equal(404);
+  });
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Camera controller health
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{webApiBase}}/api/camera/health
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("health payload", function () {
+    var body = res.getBody();
+    var status = body.Status || body.status;
+    expect(status).to.not.equal(undefined);
+  });
+}

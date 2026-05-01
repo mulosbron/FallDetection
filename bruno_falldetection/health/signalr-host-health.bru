@@ -1,0 +1,22 @@
+meta {
+  name: SignalR host health
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{signalrBase}}/health
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("healthy", function () {
+    var body = res.getBody();
+    expect(body.status).to.equal("healthy");
+  });
+}

@@ -1,0 +1,30 @@
+name: falldetection
+
+# Dashboard nginx — once: docker network create fall_detection_network
+
+services:
+  factory-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_WEB_API_BASE: http://localhost:5000
+        REACT_APP_SIGNALR_URL: http://localhost:5001/alertHub
+    container_name: fall_detection_dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - fall_detection_network
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# Networks
+networks:
+  fall_detection_network:
+    external: true
+    name: fall_detection_network

@@ -1,0 +1,24 @@
+meta {
+  name: Results incidents default
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{webApiBase}}/api/results/incidents
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("incidents payload", function () {
+    var body = res.getBody();
+    expect(Array.isArray(body.incidents)).to.equal(true);
+    expect(body.pagination).to.not.equal(undefined);
+    expect(body.summary).to.not.equal(undefined);
+  });
+}

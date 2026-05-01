@@ -1,0 +1,23 @@
+meta {
+  name: Results incidents filter new
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{webApiBase}}/api/results/incidents?page=1&pageSize=5&status=New
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("pagination page size <= 5", function () {
+    var body = res.getBody();
+    expect(body.pagination.pageSize).to.equal(5);
+    expect(body.incidents.length).to.be.at.most(5);
+  });
+}

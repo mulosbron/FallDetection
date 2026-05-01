@@ -1,0 +1,23 @@
+meta {
+  name: Results incidents resolved type filter
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{webApiBase}}/api/results/incidents?page=1&pageSize=5&status=Resolved&type=FallDetected
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("pagination exists", function () {
+    var body = res.getBody();
+    expect(body.pagination.page).to.equal(1);
+    expect(body.pagination.pageSize).to.equal(5);
+  });
+}

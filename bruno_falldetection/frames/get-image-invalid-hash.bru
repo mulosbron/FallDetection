@@ -1,0 +1,17 @@
+meta {
+  name: Frames get image invalid hash
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{webApiBase}}/api/frames/image/not-a-valid-hash
+  body: none
+  auth: none
+}
+
+tests {
+  test("status 400", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

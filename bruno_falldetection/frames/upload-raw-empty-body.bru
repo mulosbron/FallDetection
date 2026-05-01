@@ -1,0 +1,26 @@
+meta {
+  name: Frames raw upload empty body
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{webApiBase}}/api/frames/raw?cameraId=1
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: image/jpeg
+}
+
+tests {
+  test("status 400", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("empty body error", function () {
+    var body = res.getBody();
+    expect(body.error).to.not.equal(undefined);
+  });
+}
