@@ -1,0 +1,64 @@
+name: falldetection
+
+# AI service — first run: docker network create fall_detection_network
+# Model download:
+# - Environment variable: $env:HF_TOKEN="hf_..."; docker compose up --build
+# - From file (default): ./secrets/hf_token.txt -> container:/run/secrets/hf_token.txt
+
+services:
+  ai-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        LLAMA_REPO_URL: https://github.com/ggml-org/llama.cpp.git
+        LLAMA_REPO_REF: master
+    container_name: fall_detection_ai_service
+    restart: unless-stopped
+    environment:
+      PYTHONPATH: /app
+      HF_TOKEN: ${HF_TOKEN:-}
+      HF_TOKEN_FILE: ${HF_TOKEN_FILE:-/run/secrets/hf_token.txt}
+      LLAMA_CLI_PATH: /usr/local/bin/llama-cli
+      LLAMA_SERVER_PATH: /usr/local/bin/llama-server
+      LLAMA_SERVER_HOST: 127.0.0.1
+      LLAMA_SERVER_PORT: 8080
+      LLAMA_SERVER_READY_TIMEOUT_SECONDS: 120
+      LLAMA_SERVER_POLL_INTERVAL_SECONDS: 2
+      THREADS: 6
+      CTX_SIZE: 8192
+      N_GPU_LAYERS: 0
+      MAX_TOKENS: 24
+      TEMPERATURE: 0.1
+      INFERENCE_TIMEOUT_SECONDS: 300
+      DOWNLOAD_MAX_RETRIES: 5
+      DOWNLOAD_RETRY_DELAY_SECONDS: 5
+      DOWNLOAD_TIMEOUT_SECONDS: 120
+      MODEL_NAME: smolvlm2-500m-video-instruct-q8-f16mmproj
+      MODEL_REPO: ggml-org/SmolVLM2-500M-Video-Instruct-GGUF
+      MODEL_FILE: SmolVLM2-500M-Video-Instruct-Q8_0.gguf
+      MODEL_PATH: /app/model/SmolVLM2-500M-Video-Instruct-Q8_0.gguf
+      MMPROJ_FILE: mmproj-SmolVLM2-500M-Video-Instruct-f16.gguf
+      MMPROJ_PATH: /app/model/mmproj-SmolVLM2-500M-Video-Instruct-f16.gguf
+    volumes:
+      - ./models:/app/model
+      - ./secrets:/run/secrets:ro
+    ports:
+      - "8200:8000"
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    networks:
+      - fall_detection_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+networks:
+  fall_detection_network:
+    external: true
+    name: fall_detection_network

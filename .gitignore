@@ -66,6 +66,7 @@ TestResults/
 # PYTHON
 ###############################################################################
 datasets/
+tests/
 secrets/
 models/*.gguf
 # VLM batch evaluation (large image set + run outputs)
