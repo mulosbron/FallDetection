@@ -1,0 +1,97 @@
+name: falldetection
+
+# MediaMTX + FFmpeg — once: docker network create fall_detection_network
+
+services:
+  rtsp_server:
+    image: bluenviron/mediamtx:1.8.4
+    container_name: fall_detection_mock_rtsp_server
+    restart: unless-stopped
+    environment:
+      MTX_PROTOCOLS: tcp
+      MTX_HLS: "yes"
+      MTX_HLSALLOWORIGIN: "*"
+      MTX_HLSALWAYSREMUX: "yes"
+    ports:
+      - "8554:8554"
+      - "8888:8888"
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "/mediamtx", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - fall_detection_network
+
+  stream_injector:
+    image: jrottenberg/ffmpeg:6.1-alpine
+    container_name: fall_detection_mock_stream_injector
+    restart: unless-stopped
+    depends_on:
+      rtsp_server:
+        condition: service_started
+    environment:
+      VIDEO_FOLDER: /videos
+      RTSP_HOST: rtsp_server
+      RTSP_PORT: 8554
+      RTSP_PATH_PREFIX: /live
+      VIDEO_BITRATE: 2M
+      VIDEO_MAXRATE: 2M
+      VIDEO_BUFSIZE: 1M
+      VIDEO_PRESET: ultrafast
+      INJECTOR_LOG_LEVEL: info
+    volumes:
+      - ./videos:/videos:ro
+      - ./scripts/start-streams.sh:/usr/local/bin/start-streams.sh:ro
+    entrypoint: ["/bin/sh", "-c", "tr -d '\\r' < /usr/local/bin/start-streams.sh | /bin/sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "pidof ffmpeg >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    networks:
+      - fall_detection_network
+
+  frame_publisher:
+    image: jrottenberg/ffmpeg:6.1-alpine
+    container_name: fall_detection_mock_frame_publisher
+    restart: unless-stopped
+    depends_on:
+      rtsp_server:
+        condition: service_started
+    environment:
+      VIDEO_FOLDER: /videos
+      HLS_BASE_URL: http://rtsp_server:8888
+      HLS_PATH_PREFIX: /live
+      FRAME_POST_URL_BASE: http://fall-detection-api:8080/api/frames/raw
+      BACKEND_HEALTH_URL: http://fall-detection-api:8080/api/health
+      FRAME_INTERVAL_SECONDS: 0.033
+    volumes:
+      - ./videos:/videos:ro
+      - ./scripts/publish-frames.sh:/usr/local/bin/publish-frames.sh:ro
+    entrypoint: ["/bin/sh", "-c", "tr -d '\\r' < /usr/local/bin/publish-frames.sh | /bin/sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "pidof ffmpeg >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    networks:
+      - fall_detection_network
+
+networks:
+  fall_detection_network:
+    external: true
+    name: fall_detection_network
