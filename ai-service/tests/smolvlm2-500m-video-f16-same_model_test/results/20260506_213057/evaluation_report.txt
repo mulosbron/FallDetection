@@ -1,0 +1,58 @@
+============================================================
+GGUF VLM FALL DETECTION — EVALUATION REPORT
+============================================================
+
+Timestamp (run): 20260506_213057
+API endpoint: http://localhost:8200/v1/inference/fall-detection
+
+DATA SOURCES
+  Class 0 (falling): C:\Users\duggy\OneDrive\Belgeler\Github\Arsiv\FallDetection\ai-service\tests\dataset\_benchmark_random_sample\falling_0
+  Class 1 (random): C:\Users\duggy\OneDrive\Belgeler\Github\Arsiv\FallDetection\ai-service\tests\dataset\_benchmark_random_sample\falling_1
+
+SAMPLE COUNTS
+  Total processed: 100
+  Valid predictions (used for metrics): 100
+  Invalid / request errors: 0
+
+--- CONFUSION MATRIX (cm[actual_label][prediction]) ---
+  Label 0 = "falling", Label 1 = "random"
+
+                Pred=0   Pred=1
+  Actual=0 (falling)      50          0
+  Actual=1 (random)     15         35
+
+GLOSSARY
+  Actual falling and predicted falling (correct): 50
+  Actual falling and predicted random/no_fall (incorrect): 0  <- missed fall (FN)
+  Actual random and predicted falling (incorrect): 15  <- false alarm (FP)
+  Actual random and predicted no_fall (correct): 35
+
+ERROR SUMMARY (positive class = falling = 0)
+  False Positive (FP): 15  — random, falling was considered
+  False Negative (FN): 0  — falling, no_fall was classified
+
+ACCURACY: 0.850000  (85.00%)
+
+--- CLASS 0 (falling) ---
+  precision: 0.769231
+  recall:    1.000000
+  f1:        0.869565
+  support:   50
+
+--- CLASS 1 (random) ---
+  precision: 1.000000
+  recall:    0.700000
+  f1:        0.823529
+  support:   50
+
+--- AVERAGES ---
+  macro F1:     0.846547
+  weighted F1:  0.846547
+  binary F1 (class0=falling): 0.869565
+
+--- QUICK INTERPRETATION ---
+In a balanced dataset (for example 200/200), accuracy around ~50% can happen
+when the model keeps predicting the same class (often prediction=1 / no_fall);
+this does not indicate a good model. If FN is high, falls are often missed.
+
+============================================================

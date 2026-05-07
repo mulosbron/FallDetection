@@ -61,16 +61,13 @@ publish/
 *.svclog
 *.scc
 TestResults/
-
+_benchmark_random_sample
 ###############################################################################
 # PYTHON
 ###############################################################################
-datasets/
-tests/
 secrets/
 models/*.gguf
 # VLM batch evaluation (large image set + run outputs)
-ai-service/tests/dataset/
 ai-service/tests/smolvlm2-256m-video-q8_model_test/logs/
 ai-service/tests/smolvlm2-256m-video-q8_model_test/results/
 ai-service/tests/smolvlm2-256m-video-f16_model_test/logs/
@@ -94,9 +91,6 @@ ai-service/tests/smolvlm2-500m-video-f16_model_test/tests/
 ai-service/tests/smolvlm2-2p2b-instruct-q8_model_test/tests/
 ai-service/tests/smolvlm2-2p2b-instruct-f16_model_test/tests/
 ai-service/tests/smolvlm2-2p2b-instruct-q4km_model_test/tests/
-dataset/ 
-report_output/
-generate_research_report.py
 __pycache__/
 *.py[cod]
 *$py.class

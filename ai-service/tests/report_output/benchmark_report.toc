@@ -1,0 +1,20 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {section}{\numberline {2}Related Work}{3}{section.2}%
+\contentsline {section}{\numberline {3}Methodology}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Model Configurations}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Dataset}{4}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Experimental Setup}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Evaluation Metrics}{5}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Results}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Overall Performance Comparison}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Error Analysis: FP and FN}{7}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Precision--Recall Trade-off}{8}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Inference Time Analysis}{10}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Repeatability}{10}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Discussion}{11}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Effect of Model Size (256M vs 500M)}{11}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Effect of Quantization Strategy}{11}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Shift in Error Type}{12}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Practical Implications}{12}{subsection.5.4}%
+\contentsline {section}{\numberline {6}Conclusion and Future Work}{12}{section.6}%

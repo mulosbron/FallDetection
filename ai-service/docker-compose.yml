@@ -34,12 +34,13 @@ services:
       DOWNLOAD_MAX_RETRIES: 5
       DOWNLOAD_RETRY_DELAY_SECONDS: 5
       DOWNLOAD_TIMEOUT_SECONDS: 120
-      MODEL_NAME: smolvlm2-500m-video-instruct-q8-f16mmproj
-      MODEL_REPO: ggml-org/SmolVLM2-500M-Video-Instruct-GGUF
-      MODEL_FILE: SmolVLM2-500M-Video-Instruct-Q8_0.gguf
-      MODEL_PATH: /app/model/SmolVLM2-500M-Video-Instruct-Q8_0.gguf
-      MMPROJ_FILE: mmproj-SmolVLM2-500M-Video-Instruct-f16.gguf
-      MMPROJ_PATH: /app/model/mmproj-SmolVLM2-500M-Video-Instruct-f16.gguf
+      MODEL_NAME: ${MODEL_NAME:-smolvlm2-500m-video-instruct-q8-f16mmproj}
+      MODEL_REPO: ${MODEL_REPO:-ggml-org/SmolVLM2-500M-Video-Instruct-GGUF}
+      MODEL_DIR: ${MODEL_DIR:-/app/model}
+      MODEL_FILE: ${MODEL_FILE:-SmolVLM2-500M-Video-Instruct-Q8_0.gguf}
+      MODEL_PATH: ${MODEL_PATH:-/app/model/SmolVLM2-500M-Video-Instruct-Q8_0.gguf}
+      MMPROJ_FILE: ${MMPROJ_FILE:-mmproj-SmolVLM2-500M-Video-Instruct-f16.gguf}
+      MMPROJ_PATH: ${MMPROJ_PATH:-/app/model/mmproj-SmolVLM2-500M-Video-Instruct-f16.gguf}
     volumes:
       - ./models:/app/model
       - ./secrets:/run/secrets:ro

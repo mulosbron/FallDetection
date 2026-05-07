@@ -1,0 +1,68 @@
+{
+  "timestamp": "20260506_211721",
+  "endpoint": "http://localhost:8200/v1/inference/fall-detection",
+  "dataset": {
+    "class0_falling_total": 50,
+    "class1_random_total": 50,
+    "samples_total": 100,
+    "valid_predictions": 100,
+    "invalid_predictions": 0
+  },
+  "label_mapping": {
+    "0": "falling_person",
+    "1": "random_image",
+    "prediction_fall_detected": 0,
+    "prediction_no_fall": 1
+  },
+  "metrics": {
+    "accuracy": 0.87,
+    "confusion_matrix": [
+      [
+        50,
+        0
+      ],
+      [
+        13,
+        37
+      ]
+    ],
+    "fp_class0_positive": 13,
+    "fn_class0_positive": 0,
+    "classification_report": {
+      "class_0_falling": {
+        "precision": 0.793651,
+        "recall": 1.0,
+        "f1": 0.884956,
+        "accuracy": 0.87,
+        "support": 50
+      },
+      "class_1_random": {
+        "precision": 1.0,
+        "recall": 0.74,
+        "f1": 0.850575,
+        "accuracy": 0.87,
+        "support": 50
+      },
+      "macro_avg": {
+        "precision": 0.896825,
+        "recall": 0.87,
+        "f1": 0.867765,
+        "accuracy": 0.87,
+        "support": 100
+      },
+      "weighted_avg": {
+        "precision": 0.896825,
+        "recall": 0.87,
+        "f1": 0.867765,
+        "accuracy": 0.87,
+        "support": 100
+      }
+    },
+    "binary_metrics_positive_class_0": {
+      "precision": 0.793651,
+      "recall": 1.0,
+      "f1": 0.884956,
+      "accuracy": 0.87
+    }
+  }
+}

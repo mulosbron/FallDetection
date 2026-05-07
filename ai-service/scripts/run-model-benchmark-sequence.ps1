@@ -1,7 +1,7 @@
 param(
     [string]$Endpoint = "http://localhost:8200/v1/inference/fall-detection",
     [int]$WaitSeconds = 180,
-    [int]$SamplePerClass = 2000,
+    [int]$SamplePerClass = 50,
     [switch]$ContinueOnError
 )
 
