@@ -118,6 +118,14 @@ pip-log.txt
 pip-delete-this-directory.txt
 htmlcov/
 .tox/
+
+###############################################################################
+# AI Service LaTeX report outputs (keep final PDF only)
+###############################################################################
+# Ignore all generated report artifacts
+ai-service/tests/report_output/**
+# ...but keep the final PDF in git
+!ai-service/tests/report_output/benchmark_report.pdf
 .nox/
 .coandrage
 .coandrage.*
